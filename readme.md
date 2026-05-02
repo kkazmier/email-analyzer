@@ -64,34 +64,33 @@ i generuje raport z oceną poziomu ryzyka.
 
 ```
 email-analyzer/
+├── mails                           # Przykładowe wiadomości
 ├── pom.xml
 ├── reports/                        # Generowane raporty
-├── sample-suspicious.eml           # Przykładowa podejrzana wiadomość
 ├── sample-clean.eml                # Przykładowa bezpieczna wiadomość
 └── src/
     └── main/
         └── java/
-            └── com/
-                └── emailanalyzer/
-                    ├── Main.java
-                    ├── model/
-                    │   ├── EmailMessage.java       # Record - model wiadomości
-                    │   ├── Finding.java            # Sealed interface - wykrycia
-                    │   ├── KeywordFinding.java     # Record
-                    │   ├── UrlFinding.java         # Record
-                    │   ├── MetadataFinding.java    # Record
-                    │   ├── PunycodeFinding.java    # Record
-                    │   ├── RiskLevel.java          # Enum poziomów ryzyka
-                    │   └── AnalysisReport.java     # Record - raport
-                    ├── parser/
-                    │   └── EmailParser.java        # Parsowanie .eml
-                    ├── analyzer/
-                    │   ├── Analyzer.java           # Funkcyjny interfejs
-                    │   ├── AnalyzerFactory.java    # Fabryka reguł analizy
-                    │   └── AnalysisService.java    # Serwis analizy
-                    └── report/
-                        ├── ReportPrinter.java      # Wyświetlanie raportu
-                        └── ReportExporter.java     # Zapis raportu do pliku
+            └── emailanalyzer/
+                ├── Main.java
+                ├── model/
+                │   ├── EmailMessage.java       # Record - model wiadomości
+                │   ├── Finding.java            # Sealed interface - wykrycia
+                │   ├── KeywordFinding.java     # Record
+                │   ├── UrlFinding.java         # Record
+                │   ├── MetadataFinding.java    # Record
+                │   ├── PunycodeFinding.java    # Record
+                │   ├── RiskLevel.java          # Enum poziomów ryzyka
+                │   └── AnalysisReport.java     # Record - raport
+                ├── parser/
+                │   └── EmailParser.java        # Parsowanie .eml
+                ├── analyzer/
+                │   ├── Analyzer.java           # Funkcyjny interfejs
+                │   ├── AnalyzerFactory.java    # Fabryka reguł analizy
+                │   └── AnalysisService.java    # Serwis analizy
+                └── report/
+                    ├── ReportPrinter.java      # Wyświetlanie raportu
+                    └── ReportExporter.java     # Zapis raportu do pliku
 ```
 
 ---
