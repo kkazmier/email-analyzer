@@ -4,6 +4,8 @@ import model.EmailMessage;
 import parser.EmailParser;
 import report.ReportPrinter;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -17,23 +19,12 @@ import java.util.function.Function;
  * parse -> analyze -> print
  */
 public class Main {
+    public static void main(String[] args) throws IOException {
 
-    public static void main(String[] args) {
+        EmailParser parser      = new EmailParser();
+        AnalysisService service = AnalysisService.withDefaultAnalyzers();
+        ReportPrinter printer   = new ReportPrinter();
 
-        // Pobieramy ścieżki plików z argumentów lub używamy przykładowych
-        List<Path> paths = Optional.of(args)
-                .filter(a -> a.length > 0)
-                .map(a -> Arrays.stream(a)
-                        .map(Path::of)
-                        .toList())
-                .orElseGet(() -> List.of(Path.of("sample.eml")));
-
-        // Budujemy pipeline jako złożenie funkcji
-        EmailParser parser          = new EmailParser();
-        AnalysisService service     = AnalysisService.withDefaultAnalyzers();
-        ReportPrinter printer       = new ReportPrinter();
-
-        // Function pipeline: Path -> EmailMessage -> AnalysisReport
         Function<Path, Optional<EmailMessage>> parseStep = path -> {
             try {
                 return Optional.of(parser.parse(path));
@@ -45,10 +36,30 @@ public class Main {
 
         Function<EmailMessage, AnalysisReport> analyzeStep = service::analyze;
 
-        // Uruchamiamy pipeline dla każdego pliku
+        // Jeśli podano argumenty - użyj ich
+        // Jeśli nie - znajdź wszystkie .eml w katalogu roboczym
+        List<Path> paths = Optional.of(args)
+                .filter(a -> a.length > 0)
+                .map(a -> Arrays.stream(a)
+                        .map(Path::of)
+                        .toList())
+                .orElseGet(() -> {
+                    try {
+                        return Files.list(Path.of("./mails"))
+                                .filter(p -> p.toString().endsWith(".eml"))
+                                .sorted()
+                                .toList();
+                    } catch (IOException e) {
+                        return List.of();
+                    }
+                });
+
+        System.out.println("Znaleziono plików .eml: " + paths.size());
+        System.out.println();
+
         paths.stream()
                 .map(parseStep)
-                .flatMap(Optional::stream)          // pomijamy błędy parsowania
+                .flatMap(Optional::stream)
                 .map(analyzeStep)
                 .forEach(printer::print);
     }
