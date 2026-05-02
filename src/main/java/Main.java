@@ -2,6 +2,7 @@ import analyzer.AnalysisService;
 import model.AnalysisReport;
 import model.EmailMessage;
 import parser.EmailParser;
+import report.ReportExporter;
 import report.ReportPrinter;
 
 import java.io.IOException;
@@ -19,11 +20,13 @@ import java.util.function.Function;
  * parse -> analyze -> print
  */
 public class Main {
-    public static void main(String[] args) throws IOException {
 
-        EmailParser parser      = new EmailParser();
-        AnalysisService service = AnalysisService.withDefaultAnalyzers();
-        ReportPrinter printer   = new ReportPrinter();
+    public static void main(String[] args) {
+
+        EmailParser parser       = new EmailParser();
+        AnalysisService service  = AnalysisService.withDefaultAnalyzers();
+        ReportPrinter printer    = new ReportPrinter();
+        ReportExporter exporter  = new ReportExporter();
 
         Function<Path, Optional<EmailMessage>> parseStep = path -> {
             try {
@@ -36,8 +39,7 @@ public class Main {
 
         Function<EmailMessage, AnalysisReport> analyzeStep = service::analyze;
 
-        // Jeśli podano argumenty - użyj ich
-        // Jeśli nie - znajdź wszystkie .eml w katalogu roboczym
+        // Znajdź pliki .eml
         List<Path> paths = Optional.of(args)
                 .filter(a -> a.length > 0)
                 .map(a -> Arrays.stream(a)
@@ -57,10 +59,22 @@ public class Main {
         System.out.println("Znaleziono plików .eml: " + paths.size());
         System.out.println();
 
+        // Pipeline: parse -> analyze -> print + export
         paths.stream()
                 .map(parseStep)
                 .flatMap(Optional::stream)
                 .map(analyzeStep)
-                .forEach(printer::print);
+                .forEach(report -> {
+                    // Wyświetl na konsolę
+                    printer.print(report);
+
+                    // Zapisz do pliku w reports/
+                    try {
+                        exporter.export(report);
+                    } catch (IOException e) {
+                        System.err.println("Błąd zapisu raportu: " + e.getMessage());
+                    }
+                });
     }
 }
+
